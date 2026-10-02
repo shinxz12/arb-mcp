@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
 
         # NEW SCHEMA WITH WORKFLOW FEATURES
         await conn.execute("""
-            CREATE TABLE users (
+            CREATE TABLE IF NOT EXISTS users (
                 username VARCHAR(255) PRIMARY KEY,
                 role VARCHAR(50),
                 api_key VARCHAR(255) UNIQUE,
@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
                 delegate_to VARCHAR(255) REFERENCES users(username) -- Who to route to if OOO
             );
 
-            CREATE TABLE conversations (
+            CREATE TABLE IF NOT EXISTS conversations (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(255),
                 tickets TEXT[],
@@ -43,13 +43,13 @@ async def lifespan(app: FastAPI):
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
-            CREATE TABLE participants (
+            CREATE TABLE IF NOT EXISTS participants (
                 conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
                 username VARCHAR(255) REFERENCES users(username),
                 PRIMARY KEY (conversation_id, username)
             );
 
-            CREATE TABLE messages (
+            CREATE TABLE IF NOT EXISTS messages (
                 id SERIAL PRIMARY KEY,
                 conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
                 from_user VARCHAR(255) REFERENCES users(username),
