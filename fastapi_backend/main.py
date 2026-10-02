@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends, HTTPException, Security, Request, Form
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 import asyncpg
 import secrets
 from dotenv import load_dotenv
@@ -170,7 +171,6 @@ async def add_participant(conv_id: int, payload: AddParticipant, user: dict = De
 # CÁC API CORE CŨ (Đã update logic OOO Routing)
 # ==========================================
 
-from pydantic import BaseModel
 
 @app.get("/users")
 async def get_users(role: Optional[str] = None, user: dict = Depends(get_current_user)):
