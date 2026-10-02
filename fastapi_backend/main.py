@@ -2,15 +2,17 @@ import os
 from contextlib import asynccontextmanager
 from typing import Optional, List
 from fastapi import FastAPI, Depends, HTTPException, Security, Request, Form
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 import asyncpg
+import secrets
 from dotenv import load_dotenv
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 pool = None
 
 @asynccontextmanager
@@ -274,8 +276,21 @@ async def resolve_conversation(conv_id: int, user: dict = Depends(get_current_us
 # WEB UI ENDPOINTS
 # ==========================================
 
+security_basic = HTTPBasic()
+
+def verify_admin(credentials: HTTPBasicCredentials = Depends(security_basic)):
+    correct_username = secrets.compare_digest(credentials.username, "admin")
+    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
+async def dashboard(request: Request, admin: str = Depends(verify_admin)):
     async with pool.acquire() as conn:
         users = await conn.fetch("SELECT * FROM users")
         convs = await conn.fetch("SELECT * FROM conversations ORDER BY created_at DESC")
@@ -294,7 +309,7 @@ async def dashboard(request: Request):
     )
 
 @app.post("/admin/register")
-async def register_user(request: Request, username: str = Form(...), role: str = Form(...), api_key: str = Form(...)):
+async def register_user(request: Request, username: str = Form(...), role: str = Form(...), api_key: str = Form(...), admin: str = Depends(verify_admin)):
     async with pool.acquire() as conn:
         try:
             await conn.execute("INSERT INTO users (username, role, api_key) VALUES ($1, $2, $3)", username, role, api_key)
