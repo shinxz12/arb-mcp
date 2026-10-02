@@ -2,38 +2,48 @@
 
 # ==============================================================================
 # AI MAILBOX - 1-CLICK MCP INSTALLER
-# Usage: curl -sL https://raw.githubusercontent.com/.../install.sh | bash
+# Usage: curl -sL https://raw.githubusercontent.com/shinxz12/arb-mcp/main/install.sh | bash
 # ==============================================================================
 
 set -e
 
 echo -e "\n🚀 BẮT ĐẦU CÀI ĐẶT AI MAILBOX MCP CLIENT...\n"
 
+# 1. Thu thập thông tin từ User
 read -p "🌍 Nhập Backend API URL (Mặc định: https://arb-mcp.btngoc.io.vn): " API_URL
 API_URL=${API_URL:-"https://arb-mcp.btngoc.io.vn"}
 
 read -p "👤 Nhập Role của bạn (DEV hoặc PO): " ROLE
-ROLE=${ROLE^^} # Uppercase
+ROLE=$(echo "$ROLE" | tr '[:lower:]' '[:upper:]') # Uppercase
 
 read -p "🏷️  Nhập Username của bạn (VD: dev_hung): " USERNAME
 read -p "🔑 Nhập API Key do Admin cấp: " API_KEY
 
-# Lấy đường dẫn tuyệt đối của thư mục hiện tại
-PROJECT_DIR="$(pwd)"
-MCP_SCRIPT="$PROJECT_DIR/dist/index.js"
+# 2. Tạo thư mục cài đặt tự động ở Home Directory
+INSTALL_DIR="$HOME/.ai-mailbox"
+echo -e "\n📥 Đang tải mã nguồn về máy (tại $INSTALL_DIR)..."
 
-# 2. Cài đặt thư viện & Build Node.js Server
-echo -e "\n📦 Đang cài đặt thư viện và Build MCP Server..."
-if [ ! -f "package.json" ]; then
-    echo "❌ Lỗi: Bạn phải chạy script này bên trong thư mục chứa file package.json của AI Mailbox!"
-    exit 1
+if [ ! -d "$INSTALL_DIR" ]; then
+    git clone https://github.com/shinxz12/arb-mcp.git "$INSTALL_DIR" --quiet
+else
+    echo "   -> Đã có sẵn mã nguồn, đang cập nhật bản mới nhất..."
+    cd "$INSTALL_DIR"
+    git pull origin main --quiet
 fi
+
+cd "$INSTALL_DIR"
+
+# Lấy đường dẫn tuyệt đối file script
+MCP_SCRIPT="$INSTALL_DIR/dist/index.js"
+
+# 3. Cài đặt thư viện & Build Node.js Server
+echo -e "\n📦 Đang cài đặt thư viện và Build MCP Server..."
 npm install --silent
 npm run build --silent
 
-echo -e "✅ Build thành công: $MCP_SCRIPT"
+echo -e "✅ Build thành công tại: $MCP_SCRIPT"
 
-# 3. Tạo khối JSON cấu hình MCP
+# 4. Tạo khối JSON cấu hình MCP
 MCP_CONFIG=$(cat <<EOF
 {
   "command": "node",
@@ -48,7 +58,7 @@ MCP_CONFIG=$(cat <<EOF
 EOF
 )
 
-# 4. Tự động Add vào cấu hình của các AI Client bằng JSON
+# 5. Tự động Add vào cấu hình của các AI Client bằng JSON
 echo -e "\n⚙️  Đang tự động chèn cấu hình JSON..."
 
 inject_mcp() {
@@ -64,7 +74,7 @@ inject_mcp() {
     fi
 }
 
-# 4.1. Add vào Claude Desktop
+# 5.1. Add vào Claude Desktop
 if [[ "$OSTYPE" == "darwin"* ]]; then
     CLAUDE_CONFIG_DIR="$HOME/Library/Application Support/Claude"
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -82,19 +92,17 @@ if [ -n "$CLAUDE_CONFIG_DIR" ]; then
     inject_mcp "$CLAUDE_CONFIG"
 fi
 
-# 4.2. Add vào Oh My Pi
-if [ -f "$PROJECT_DIR/mcp.json" ]; then
-    inject_mcp "$PROJECT_DIR/mcp.json"
-elif [ -f "$HOME/.omp/mcp.json" ]; then
+# 5.2. Add vào Oh My Pi
+if [ -f "$HOME/.omp/mcp.json" ]; then
     inject_mcp "$HOME/.omp/mcp.json"
 fi
 
-# 4.3. Add vào Codex (Config File)
+# 5.3. Add vào Codex (Config File)
 if [ -f "$HOME/.codex/mcp.json" ]; then
     inject_mcp "$HOME/.codex/mcp.json"
 fi
 
-# 5. Tự động Add bằng CLI Commands (Claude Code, Codex CLI)
+# 6. Tự động Add bằng CLI Commands (Claude Code, Codex CLI)
 echo -e "\n🤖 Đang kiểm tra các CLI Agents..."
 
 if command -v claude &> /dev/null; then
@@ -109,7 +117,6 @@ fi
 
 if command -v codex &> /dev/null; then
     echo "   -> Phát hiện Codex CLI. Đang tự động add MCP..."
-    # Thử lệnh add của Codex. 
     codex mcp add ai-mailbox node "$MCP_SCRIPT" \
         -e MAILBOX_API_URL="$API_URL" \
         -e MAILBOX_API_KEY="$API_KEY" \
@@ -121,4 +128,4 @@ fi
 echo -e "\n🎉 HOÀN TẤT! HỆ THỐNG ĐÃ SẴN SÀNG."
 echo -e "Dưới đây là cấu hình JSON dự phòng (trong trường hợp bạn cần add thủ công vào Cursor / Cline / RooCode):\n"
 echo "\"ai-mailbox\": $MCP_CONFIG"
-echo -e "\nĐừng quên copy file Rules trong thư mục 'skills/' vào máy nhé!"
+echo -e "\nĐừng quên bảo mọi người lấy file Rules trong thư mục '$INSTALL_DIR/skills/' nạp vào AI nhé!"
