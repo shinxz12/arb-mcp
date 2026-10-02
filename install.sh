@@ -100,14 +100,22 @@ if [ -n "$CLAUDE_CONFIG_DIR" ]; then
 fi
 
 # 5.2. Add vào Oh My Pi
-if [ -f "$HOME/.omp/mcp.json" ]; then
-    inject_mcp "$HOME/.omp/mcp.json"
+OMP_CONFIG_DIR="$HOME/.omp"
+mkdir -p "$OMP_CONFIG_DIR"
+OMP_CONFIG="$OMP_CONFIG_DIR/mcp.json"
+if [ ! -f "$OMP_CONFIG" ]; then
+    echo '{"mcpServers": {}}' > "$OMP_CONFIG"
 fi
+inject_mcp "$OMP_CONFIG"
 
 # 5.3. Add vào Codex (Config File)
-if [ -f "$HOME/.codex/mcp.json" ]; then
-    inject_mcp "$HOME/.codex/mcp.json"
+CODEX_CONFIG_DIR="$HOME/.codex"
+mkdir -p "$CODEX_CONFIG_DIR"
+CODEX_CONFIG="$CODEX_CONFIG_DIR/mcp.json"
+if [ ! -f "$CODEX_CONFIG" ]; then
+    echo '{"mcpServers": {}}' > "$CODEX_CONFIG"
 fi
+inject_mcp "$CODEX_CONFIG"
 
 # 6. Tự động Add bằng CLI Commands (Claude Code, Codex CLI)
 echo -e "\n🤖 Đang kiểm tra các CLI Agents..."
