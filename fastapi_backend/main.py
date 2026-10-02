@@ -172,6 +172,10 @@ async def add_participant(conv_id: int, payload: AddParticipant, user: dict = De
 # ==========================================
 
 
+@app.get("/users/me")
+async def get_my_info(user: dict = Depends(get_current_user)):
+    return user
+
 @app.get("/users")
 async def get_users(role: Optional[str] = None, user: dict = Depends(get_current_user)):
     async with pool.acquire() as conn:
