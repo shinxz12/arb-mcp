@@ -10,14 +10,21 @@ set -e
 echo -e "\n🚀 BẮT ĐẦU CÀI ĐẶT AI MAILBOX MCP CLIENT...\n"
 
 # 1. Thu thập thông tin từ User
-read -p "🌍 Nhập Backend API URL (Mặc định: https://arb-mcp.btngoc.io.vn): " API_URL
+read -p "🌍 Nhập Backend API URL (Mặc định: https://arb-mcp.btngoc.io.vn): " API_URL < /dev/tty
 API_URL=${API_URL:-"https://arb-mcp.btngoc.io.vn"}
+read -p "🔑 Nhập API Key của bạn do Admin cấp: " API_KEY < /dev/tty
 
-read -p "👤 Nhập Role của bạn (DEV hoặc PO): " ROLE
-ROLE=$(echo "$ROLE" | tr '[:lower:]' '[:upper:]') # Uppercase
+echo -e "\n🔍 Đang kiểm tra API Key..."
+USER_INFO=$(curl -s -H "Authorization: Bearer $API_KEY" "$API_URL/users/me")
 
-read -p "🏷️  Nhập Username của bạn (VD: dev_hung): " USERNAME
-read -p "🔑 Nhập API Key do Admin cấp: " API_KEY
+if echo "$USER_INFO" | grep -q '"username"'; then
+    USERNAME=$(echo "$USER_INFO" | grep -o '"username":"[^"]*' | cut -d'"' -f4)
+    ROLE=$(echo "$USER_INFO" | grep -o '"role":"[^"]*' | cut -d'"' -f4)
+    echo -e "   ✅ Xác thực thành công! Đăng nhập với tư cách: $USERNAME (Role: $ROLE)"
+else
+    echo -e "   ❌ Lỗi: API Key không hợp lệ hoặc Server chưa cập nhật bản mới nhất."
+    exit 1
+fi
 
 # 2. Tạo thư mục cài đặt tự động ở Home Directory
 INSTALL_DIR="$HOME/.ai-mailbox"
