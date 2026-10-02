@@ -1,61 +1,43 @@
-# Jira AI Sync MCP Server
+# AI Mailbox (MCP Server)
 
-An MCP (Model Context Protocol) server designed to facilitate AI-to-AI communication between a Developer AI and a Product Owner (PO) AI over Jira tickets.
+Hệ thống giao tiếp bất đồng bộ (Asynchronous) chuyên biệt dành cho AI của Developer và Product Owner (PO), giúp tự động hoá quy trình làm rõ yêu cầu (Specs/Requirements) của dự án.
 
-When Jira tickets have unclear requirements, this server provides the necessary tools for the AIs to:
-1. **Read the Ticket Context:** Understand the current description, status, and conversation history.
-2. **Communicate:** Post comments to ask clarifying questions (Developer AI) or provide answers (PO AI).
-3. **Refine Requirements:** Update the ticket description once a consensus is reached.
+Thay vì chat trực tiếp trên Jira gây rác ticket, hệ thống này tạo ra một "Phòng Đàm Phán" (Group Chat) riêng tư. Các AI (như Claude, Cursor) sẽ giao tiếp với nhau qua giao thức MCP, tự động tra cứu, tự động gộp nhóm ticket và ưu tiên các vấn đề nóng (BLOCKING).
 
-## Setup
+---
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+## ⚡️ Cài đặt siêu tốc (1-Click Install)
 
-2. **Configure Environment Variables:**
-   Create a `.env` file in the root directory (or provide these to your MCP client):
-   ```env
-   JIRA_BASE_URL=https://your-domain.atlassian.net
-   JIRA_USER_EMAIL=your-email@example.com
-   JIRA_API_TOKEN=your-jira-api-token
-   ```
+Dành cho Dev và PO muốn kết nối AI của mình vào hệ thống nhanh nhất. Bạn chỉ cần mở Terminal (trên Mac/Linux) và chạy đúng 1 dòng lệnh này:
 
-3. **Build the server:**
-   ```bash
-   npm run build
-   ```
-
-## Integration with MCP Clients (e.g., Claude Desktop)
-
-Add the server to your MCP client configuration (e.g., `claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "jira-ai-sync": {
-      "command": "node",
-      "args": ["/path/to/arb-mcp/dist/index.js"],
-      "env": {
-        "JIRA_BASE_URL": "https://your-domain.atlassian.net",
-        "JIRA_USER_EMAIL": "your-email@example.com",
-        "JIRA_API_TOKEN": "your-jira-api-token"
-      }
-    }
-  }
-}
+```bash
+curl -sL https://raw.githubusercontent.com/shinxz12/arb-mcp/main/install.sh | bash
 ```
 
-## Tools Provided
+**Script này sẽ tự động lo mọi việc:**
+1. Cài đặt thư viện và build mã nguồn.
+2. Yêu cầu bạn nhập Role (DEV/PO), Username, và API Key.
+3. Tự động quét và chèn cấu hình vào **Claude Desktop, Oh My Pi, Cursor, Claude Code, hoặc Codex**.
 
-- `get_ticket_context`: Given an `issueKey`, fetches the summary, description, and all comments.
-- `add_ticket_comment`: Adds a comment to the ticket. Used by AIs to converse.
-- `update_ticket_description`: Updates the main description of the ticket to solidify requirements.
+*(Nếu bạn muốn xoá tool khỏi máy, chỉ cần chạy script `uninstall.sh` tương tự).*
 
-## Workflow
+---
 
-1. **Developer AI** reads the ticket using `get_ticket_context`.
-2. Finding it unclear, **Developer AI** uses `add_ticket_comment` to post structured questions.
-3. **PO AI** reads the ticket, sees the question, and uses `add_ticket_comment` to answer.
-4. **Developer AI** (or **PO AI**) proposes an updated description using `update_ticket_description`.
+## 🧠 Hướng dẫn nạp "Skills" (Rules) cho AI
+
+Để AI biết cách tự động tìm kiếm, phân loại ưu tiên và làm việc nhóm, bạn CẦN nạp bộ quy tắc cho nó:
+1. Mở thư mục `skills/` trong repo này.
+2. **Nếu bạn là DEV:** Copy nội dung file `dev-mailbox.md` và dán vào phần System Prompt (hoặc `.cursorrules`) của AI.
+3. **Nếu bạn là PO:** Copy nội dung file `po-mailbox.md` và dán vào phần System Prompt của AI.
+
+---
+
+## 🛠 (Dành cho Admin) Hướng dẫn Deploy Backend
+
+Hệ thống bao gồm một Backend viết bằng Python (FastAPI) để quản lý Database tập trung và cung cấp Web UI.
+
+1. Deploy toàn bộ source code này lên **Coolify** (hoặc PaaS bất kỳ). Coolify sẽ tự động nhận diện file `Dockerfile` ở thư mục gốc và build backend.
+2. Cấu hình 2 biến môi trường sau trên giao diện của Coolify:
+   - `DATABASE_URL=postgresql://user:password@host:port/dbname`
+   - `ADMIN_PASSWORD=mat_khau_cua_ban`
+3. Truy cập vào Domain bạn vừa deploy (Ví dụ: `https://arb-mcp.btngoc.io.vn`) để đăng nhập vào **Admin Dashboard**. Tại đây bạn có thể theo dõi tiến độ đàm phán của các AI và tạo API Key cho nhân viên.
