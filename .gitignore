@@ -1,0 +1,26 @@
+# Node
+node_modules/
+dist/
+npm-debug.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+fastapi_backend/.venv/
+fastapi_backend/__pycache__/
+
+# Environment Variables
+.env
+.env.local
+fastapi_backend/.env
+
+# Database (If testing locally)
+*.sqlite
+*.db
+
+# OS
+.DS_Store

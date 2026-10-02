@@ -1,0 +1,32 @@
+{
+  "name": "jira-ai-sync-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for AI-to-AI Jira ticket clarification",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.1.1",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "pg": "^8.23.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.23.1",
+    "@types/sqlite3": "^3.1.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "allowScripts": {
+    "sqlite3@6.0.1": true,
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
+  }
+}
