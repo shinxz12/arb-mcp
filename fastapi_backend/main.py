@@ -22,11 +22,6 @@ async def lifespan(app: FastAPI):
     pool = await asyncpg.create_pool(DATABASE_URL)
     
     async with pool.acquire() as conn:
-        # DROP OLD TABLES FOR CLEAN DEPLOYMENT
-        await conn.execute("DROP TABLE IF EXISTS messages CASCADE")
-        await conn.execute("DROP TABLE IF EXISTS users CASCADE")
-        await conn.execute("DROP TABLE IF EXISTS conversations CASCADE")
-        await conn.execute("DROP TABLE IF EXISTS participants CASCADE")
 
         # NEW SCHEMA WITH WORKFLOW FEATURES
         await conn.execute("""
