@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.MAILBOX_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.MAILBOX_API_URL || 'https://arb-mcp.btngoc.io.vn';
 const API_KEY = process.env.MAILBOX_API_KEY;
 
 if (!API_KEY) {

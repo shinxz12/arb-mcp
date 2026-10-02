@@ -9,9 +9,8 @@ set -e
 
 echo -e "\n🚀 BẮT ĐẦU CÀI ĐẶT AI MAILBOX MCP CLIENT...\n"
 
-# 1. Thu thập thông tin từ User
-read -p "🌍 Nhập Backend API URL (VD: http://localhost:8000): " API_URL
-API_URL=${API_URL:-"http://localhost:8000"}
+read -p "🌍 Nhập Backend API URL (Mặc định: https://arb-mcp.btngoc.io.vn): " API_URL
+API_URL=${API_URL:-"https://arb-mcp.btngoc.io.vn"}
 
 read -p "👤 Nhập Role của bạn (DEV hoặc PO): " ROLE
 ROLE=${ROLE^^} # Uppercase

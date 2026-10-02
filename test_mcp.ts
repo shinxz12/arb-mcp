@@ -9,7 +9,7 @@ async function runSession(username: string, apiKey: string, role: string, action
     args: ["dist/index.js"],
     env: {
       ...process.env,
-      MAILBOX_API_URL: "http://localhost:8000",
+      MAILBOX_API_URL: "https://arb-mcp.btngoc.io.vn",
       MAILBOX_API_KEY: apiKey,
       MAILBOX_USERNAME: username,
       MAILBOX_ROLE: role
