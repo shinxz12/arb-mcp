@@ -6,6 +6,7 @@
 # ==============================================================================
 
 set -e
+ORIGINAL_DIR="$PWD"
 
 echo -e "\n🚀 BẮT ĐẦU CÀI ĐẶT AI MAILBOX MCP CLIENT...\n"
 
@@ -143,4 +144,25 @@ fi
 echo -e "\n🎉 HOÀN TẤT! HỆ THỐNG ĐÃ SẴN SÀNG."
 echo -e "Dưới đây là cấu hình JSON dự phòng (trong trường hợp bạn cần add thủ công vào Cursor / Cline / RooCode):\n"
 echo "\"ai-mailbox\": $MCP_CONFIG"
-echo -e "\nĐừng quên bảo mọi người lấy file Rules trong thư mục '$INSTALL_DIR/skills/' nạp vào AI nhé!"
+# 7. Tự động chèn Skill Rules vào Workspace hiện tại
+echo -e "\n🧠 Đang tự động nạp AI Rules vào Workspace hiện tại ($ORIGINAL_DIR)..."
+if [ "$ORIGINAL_DIR" != "$HOME" ]; then
+    # Cho Cursor
+    mkdir -p "$ORIGINAL_DIR/.cursor/rules"
+    cp "$INSTALL_DIR/skills/dev-mailbox.md" "$ORIGINAL_DIR/.cursor/rules/arb-mcp.mdc" 2>/dev/null || true
+    
+    # Cho RooCode / Cline
+    cp "$INSTALL_DIR/skills/dev-mailbox.md" "$ORIGINAL_DIR/.clinerules-arb-mcp" 2>/dev/null || true
+    
+    # Cho Oh My Pi / Codex (AGENTS.md / CLAUDE.md)
+    if [ -f "$ORIGINAL_DIR/AGENTS.md" ]; then
+        echo -e "\n- AI Mailbox MCP Rules (arb-mcp): [AI_MAILBOX_RULES.md](AI_MAILBOX_RULES.md)" >> "$ORIGINAL_DIR/AGENTS.md"
+        cp "$INSTALL_DIR/skills/dev-mailbox.md" "$ORIGINAL_DIR/AI_MAILBOX_RULES.md" 2>/dev/null || true
+    elif [ -f "$ORIGINAL_DIR/CLAUDE.md" ]; then
+        echo -e "\n- AI Mailbox MCP Rules (arb-mcp): [AI_MAILBOX_RULES.md](AI_MAILBOX_RULES.md)" >> "$ORIGINAL_DIR/CLAUDE.md"
+        cp "$INSTALL_DIR/skills/dev-mailbox.md" "$ORIGINAL_DIR/AI_MAILBOX_RULES.md" 2>/dev/null || true
+    fi
+    echo "   ✅ Đã nạp xong rules cho Cursor, RooCode và Oh My Pi tại project của bạn!"
+else
+    echo "   ⚠️ Bạn đang chạy lệnh ở thư mục Home. Để AI hiểu lệnh 'arb-mcp', hãy tự copy file '$INSTALL_DIR/skills/dev-mailbox.md' vào thư mục project của bạn nhé!"
+fi
